@@ -14,7 +14,7 @@ public class GameManager : Singleton<GameManager>
     public static event Action<GameState> onBeforeStateChanged;
     public static event Action<GameState> onAfterStateChanged;
     public GameState state { get; private set; }
-
+    public GameObject player;
     private void Start()
     {
         UpdateGameState(GameState.Start);
