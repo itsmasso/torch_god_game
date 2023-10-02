@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dd49cce7034b9c43b67bdfc3bb70ea2, type: 3}
+  m_Name: BruteEnemy1
+  m_EditorClassIdentifier: 
+  enemyType: 1
+  enemyStats:
+    movementSpeed: 3
+    health: 600
+    attack: 20
+    xpDropped: 30
+  enemyName: 
+  enemyPrefab: {fileID: 3212807800452574424, guid: 6f7f90c09b6ccdc4cae15311948b6c88, type: 3}

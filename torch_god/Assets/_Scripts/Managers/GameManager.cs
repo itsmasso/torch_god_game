@@ -1,46 +1,66 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
+using UnityEngine.SceneManagement;
 
-//all the states
-public enum GameState
+//This manager singleton does not destroy through scene loads and keeps track of which levels the player is on and will switch scenes accordingly
+public class GameManager : PersistentSingleton<GameManager>
 {
-    Start
-}
+    public static event Action<int> onBeforeSceneChanged;
+    public static event Action<int> onAfterSceneChanged;
+    public int currentScene { get; private set; }
+    public int startscreen = 0;
+    public int level1Scene = 1;
 
-public class GameManager : Singleton<GameManager>
-{
-    public static event Action<GameState> onBeforeStateChanged;
-    public static event Action<GameState> onAfterStateChanged;
-    public GameState state { get; private set; }
-    public GameObject player;
+    public Character currentCharacter;
+
     private void Start()
     {
-        UpdateGameState(GameState.Start);
+        currentCharacter = Character.TorchCharacter;
+        UpdateScene(startscreen);
     }
 
-    //updates gamestates
-    public void UpdateGameState(GameState newState)
+    public void UpdateScene(int newScene)
     {
-        onBeforeStateChanged?.Invoke(newState);
-        state = newState;
-
-        switch (newState)
+        onBeforeSceneChanged?.Invoke(newScene);
+        currentScene = newScene;
+        currentScene = SceneManager.GetActiveScene().buildIndex;
+        switch (newScene)
         {
-            case GameState.Start:
-                HandleStart();
+            case 0:
+                MainMenu();
+                break;
+            case 1:
+                Level1();
+                break;
+            case 2:
+                Level1();
                 break;
             default:
                 break;
         }
 
-        onAfterStateChanged?.Invoke(newState);
+        onAfterSceneChanged?.Invoke(newScene);
     }
 
-    //functions for states
-    public void HandleStart()
+    public void MainMenu()
+    {
+        SceneManager.LoadScene(startscreen);
+    }
+ 
+    public void Level1()
+    {
+        SceneManager.LoadScene(level1Scene);
+        
+    }
+
+    public void Level2()
     {
         //TODO
+    }
+    private void Update()
+    {
+        //Debug.Log(state);
     }
 }

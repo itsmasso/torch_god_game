@@ -1,49 +1,53 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 
-public class Weapon : MonoBehaviour
+public abstract class Weapon : MonoBehaviour
 {
     [SerializeField]
-    private GameObject projectilePrefab;
+    protected Transform firePoint;
 
-    [SerializeField]
-    private Player_Stats playerStats;
+    protected PlayerBaseScript player;
 
-    private Vector2 mousePosition; //regular mouse position on screen
-    private Vector2 projectedMousePosition;
+    protected Vector2 mousePosition; //regular mouse position on screen
+    protected Vector2 projectedMousePosition;
 
-    public void OnAim(InputAction.CallbackContext ctx)
+    protected bool canAttack;
+    protected virtual void Start()
+    {
+        player = GetComponentInParent<PlayerBaseScript>();
+        canAttack = true;
+    }
+    public virtual void OnAim(InputAction.CallbackContext ctx)
     {
         mousePosition = ctx.ReadValue<Vector2>();
     }
 
-    public void OnFire(InputAction.CallbackContext ctx)
+    public virtual void OnFire(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed)
-        {
-            GameObject projectile = Instantiate(projectilePrefab, transform.position, transform.rotation);
-            Projectile projectileScript = projectile.GetComponent<Projectile>();
-            projectileScript.damageAmount = DealDamage(playerStats.stats.attack);
-        }
+        //stuff
     }
 
-    private int DealDamage(int amount)
+    protected virtual int DealDamage(int amount)
     {
         float randomDamageMultiplier = 0.3f; //randomizes damage. A higher multiplier creates a more random damage number and higher range
         int randomDamage = UnityEngine.Random.Range(amount - Mathf.RoundToInt(amount * randomDamageMultiplier), amount + Mathf.RoundToInt(amount * randomDamageMultiplier));
         return randomDamage;
     }
-    private void Update()
+    protected virtual void Update()
     {
         projectedMousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
         Vector2 aimDirection = new Vector2(projectedMousePosition.x - transform.position.x, projectedMousePosition.y - transform.position.y);
         transform.up = aimDirection;
 
 
+    }
+
+    protected virtual void OnDestroy()
+    {
+        //stuff
     }
 
 }
