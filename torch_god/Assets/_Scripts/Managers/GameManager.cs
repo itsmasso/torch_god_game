@@ -37,7 +37,10 @@ public class GameManager : PersistentSingleton<GameManager>
     }
     private void Start()
     {
-
+        if (!File.Exists(Application.persistentDataPath+"/player-data.json"))
+        {
+            SerializeJson("/player-data.json", saveData.playerData, encryptPlayerData);
+        }
         DeserializePlayerData();
         currentCharacter = saveData.playerData.character;
         level = saveData.playerData.currentGameLevel;
