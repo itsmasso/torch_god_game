@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: 10PercentAtkSpeed
   m_EditorClassIdentifier: 
   upgradeType: 0
+  upgradePrefab: {fileID: 0}
+  needAim: 0
   statModification:
     health: 0
     movementSpeed: 0
     attack: 0
-    attackSpeed: 0.1
+    attackSpeed: 0.3
     critChance: 0
     pickUpRange: 0
   upgradeName: Attack Speed
-  upgradeDescription: Gain 10% Attack Speed
+  upgradeDescription: Gain 30% Attack Speed
   abilityDamage: 0

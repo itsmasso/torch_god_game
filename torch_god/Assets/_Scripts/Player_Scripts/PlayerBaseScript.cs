@@ -9,8 +9,7 @@ using UnityEngine.U2D;
 //Base script for player class. All playable characters inherit this class
 public abstract class PlayerBaseScript : MonoBehaviour
 {
-    public event Action<int> onLevelUp;
-
+    public static event Action<int> onLevelUp;
 
     [Header("Movement Properties")]
     public Vector2 velocity;
@@ -29,7 +28,7 @@ public abstract class PlayerBaseScript : MonoBehaviour
 
     [Header("Player Stats")]
     [SerializeField] protected ScriptablePlayerUnit playerScriptable;
-    public ScriptablePlayerData playerData;
+    public ScriptableSaveData playerData;
     [SerializeField] protected float xpNeededDivider; //lower values means more xp required per level
     [SerializeField] protected float xpLevelGapMultiplier; //higher values means larger gaps between levels
     public PlayerStats stats { get; private set; }
@@ -50,15 +49,10 @@ public abstract class PlayerBaseScript : MonoBehaviour
     }
     protected virtual void Start()
     {
-        playerData = ResourceSystem.Instance.persistentPlayerData;
+        playerData = ResourceSystem.Instance.saveData;
 
         //settings stats locally
-        pickUpRange = stats.pickUpRange + playerData.pickUpRange;
-        critChance = stats.critChance + playerData.critChance;
-        attackSpeed = stats.attackSpeed + playerData.attackSpeed;
-        attack = stats.attack + playerData.attack;
-        speed = stats.movementSpeed + playerData.movementSpeed;
-        maxHealth = stats.health + playerData.health;
+        UpdateStats();
         currentHealth = maxHealth;
 
         facingLeft = false;
@@ -74,12 +68,12 @@ public abstract class PlayerBaseScript : MonoBehaviour
     //Method is called when player picks an upgrade which fires the event.
     protected void UpdateStats()
     {       
-        pickUpRange = stats.pickUpRange + playerData.pickUpRange;
-        critChance = stats.critChance + playerData.critChance;
-        attackSpeed = stats.attackSpeed + playerData.attackSpeed;
-        attack = stats.attack + playerData.attack;
-        speed = stats.movementSpeed + playerData.movementSpeed;
-        maxHealth = stats.health + playerData.health;
+        pickUpRange = stats.pickUpRange + playerData.playerData.pickUpRange;
+        critChance = stats.critChance + playerData.playerData.critChance;
+        attackSpeed = stats.attackSpeed + playerData.playerData.attackSpeed;
+        attack = stats.attack + playerData.playerData.attack;
+        speed = stats.movementSpeed + playerData.playerData.movementSpeed;
+        maxHealth = stats.health + playerData.playerData.health;
         
     }
 
@@ -164,9 +158,9 @@ public abstract class PlayerBaseScript : MonoBehaviour
     //This method adds xp gains to the player data and will call a level up method upon reaching an xp threshhold
     protected void HandleXP(int xpGained)
     {
-        playerData.currentExperience += xpGained;
+        playerData.playerData.currentExperience += xpGained;
         
-        if (playerData.currentExperience >= playerData.maxExperience)
+        if (playerData.playerData.currentExperience >= playerData.playerData.maxExperience)
         {
             LevelUp();
         }
@@ -177,11 +171,12 @@ public abstract class PlayerBaseScript : MonoBehaviour
     {       
         //maybe add some stat level up modifications
         //maybe make current health = full health
-        playerData.currentLevel++;
-        playerData.currentExperience = 0;
-        playerData.maxExperience = (int)Mathf.Pow((playerData.currentLevel / xpNeededDivider), xpLevelGapMultiplier);
+        playerData.playerData.currentLevel++;
+        playerData.playerData.currentExperience = 0;
+        playerData.playerData.maxExperience = (int)Mathf.Pow((playerData.playerData.currentLevel / xpNeededDivider), xpLevelGapMultiplier);
+        AudioManager.Instance.PlaySFX("LevelUp");
         LevelManager.Instance.UpdateGameState(GameState.LevelUp);
-        onLevelUp?.Invoke(playerData.currentLevel);
+        onLevelUp?.Invoke(playerData.playerData.currentLevel);
     }
     protected virtual void OnDestroy()
     {

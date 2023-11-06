@@ -9,7 +9,7 @@ public class LevelBarScript : MonoBehaviour
     private Slider levelBarSlider;
 
     [SerializeField]
-    private ScriptablePlayerData playerData;
+    private ScriptableSaveData playerData;
 
     [SerializeField]
     private RectTransform fill;
@@ -24,6 +24,6 @@ public class LevelBarScript : MonoBehaviour
         fill.anchoredPosition = Vector2.zero;
 
         //maybe change to event later
-        levelBarSlider.value = (float)playerData.currentExperience / playerData.maxExperience;
+        levelBarSlider.value = (float)playerData.playerData.currentExperience / playerData.playerData.maxExperience;
     }
 }

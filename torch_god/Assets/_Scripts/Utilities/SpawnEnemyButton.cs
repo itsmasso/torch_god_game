@@ -16,13 +16,14 @@ public class SpawnEnemyButton : MonoBehaviour
     }
     public void SpawnEnemy()
     {
-
-        pool.CreatePool(ResourceSystem.Instance.GetEnemyUnit(enemy).enemyPrefab, 5);
+        Debug.Log("Note: This function has been hidden.");
+        /*
+        pool.CreatePool(ResourceSystem.Instance.GetEnemyUnit(enemy));
         GameObject enemyUnit = pool.pool.Get();
         enemyUnit.GetComponent<EnemyBaseScript>().enemyPool = pool;
         enemyUnit.GetComponent<EnemyBaseScript>().SetEnemyStats(ResourceSystem.Instance.GetEnemyUnit(enemy).enemyStats);
         enemyUnit.transform.position = Vector2.zero;
-        
+        */
     }
 
 }

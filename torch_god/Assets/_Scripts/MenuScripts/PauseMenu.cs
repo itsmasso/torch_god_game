@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PauseMenu : MonoBehaviour
 {
+
     public void GotoMainMenu()
     {
         GameManager.Instance.UpdateScene(0);
@@ -16,4 +17,5 @@ public class PauseMenu : MonoBehaviour
         LevelManager.Instance.isPaused = false;
         gameObject.SetActive(false);
     }
+
 }

@@ -11,22 +11,42 @@ public class UpgradeManager : MonoBehaviour
 
     [SerializeField] private TMP_Text upgradeName1, upgradeDescription1, upgradeName2, upgradeDescription2, upgradeName3, upgradeDescription3;
 
-    private UpgradesScriptable upgrade1, upgrade2, upgrade3;
+    private List<ScriptableUpgrade> chosenUpgrades = new List<ScriptableUpgrade>();
 
-    [SerializeField] private List<UpgradesScriptable> scriptableUpgrades;
+    [SerializeField] private ScriptableSaveData playerData;
 
     private void OnEnable()
     {
         GenerateRandomUpgrades();
     }
-    private void UpgradeStat(UpgradesScriptable upgradeScriptable)
+    private void UpgradeStat(ScriptableUpgrade upgrade)
     {
-        LevelManager.Instance.playerData.attack += upgradeScriptable.statModification.attack;
-        LevelManager.Instance.playerData.attackSpeed += upgradeScriptable.statModification.attackSpeed;
-        LevelManager.Instance.playerData.health += upgradeScriptable.statModification.health;
-        LevelManager.Instance.playerData.critChance += upgradeScriptable.statModification.critChance;
-        LevelManager.Instance.playerData.movementSpeed += upgradeScriptable.statModification.movementSpeed;
-        LevelManager.Instance.playerData.pickUpRange += upgradeScriptable.statModification.pickUpRange;
+        ScriptableSaveData playerData = LevelManager.Instance.saveData;
+        playerData.playerData.attack += upgrade.statModification.attack;
+        playerData.playerData.attackSpeed += upgrade.statModification.attackSpeed;
+        playerData.playerData.health += upgrade.statModification.health;
+        playerData.playerData.critChance += upgrade.statModification.critChance;
+        playerData.playerData.movementSpeed += upgrade.statModification.movementSpeed;
+        playerData.playerData.pickUpRange += upgrade.statModification.pickUpRange;
+    }
+
+    private void AttatchUpgradesToPlayer(GameObject upgrade)
+    {
+        GameObject parent = LevelManager.Instance.player;
+
+        if (upgrade.GetComponent<IUpgradeable>().ReturnScriptableObject().needAim)
+        {
+            Weapon weaponReference = parent.GetComponentInChildren<Weapon>();
+            GameObject upgradeObj = Instantiate(upgrade, weaponReference.transform.position, weaponReference.firePoint.rotation);
+            upgradeObj.transform.parent = weaponReference.firePoint.transform;
+
+        }
+        else
+        {
+            
+            GameObject upgradeObj = Instantiate(upgrade, parent.transform.position, Quaternion.identity);
+            upgradeObj.transform.parent = parent.transform;
+        }
     }
 
     private void Item()
@@ -34,35 +54,68 @@ public class UpgradeManager : MonoBehaviour
         //TODO
     }
 
-    private void WeaponEnhancement()
+    private void Ability(ScriptableUpgrade upgrade)
     {
-        //TODO
-    }
+        bool hasUpgrade = false;
 
-    private void Ability()
-    {
-        //TODO
+        //we level up upgrades in scene and in player data list because the ones in scenes get destroyed after scene loads and we load in saved ones in player data.
+        IUpgradeable[] upgradeableInSceneList = LevelManager.Instance.player.GetComponentsInChildren<IUpgradeable>();
+        foreach (IUpgradeable upgradeableInScene in upgradeableInSceneList)
+        {
+            if (upgradeableInScene.ReturnScriptableObject() == upgrade)
+            {
+                //level up current upgrade in scene 
+                upgradeableInScene.LevelUpUpgrade();
+                hasUpgrade = true;
+                break;
+            }
+        }
+
+        if (!hasUpgrade)
+        {
+            playerData.playerData.currentUpgradeIDs.Add(ResourceSystem.Instance.GetUpgradeID(upgrade));
+            AttatchUpgradesToPlayer(upgrade.upgradePrefab);
+        }
     }
 
 
     private void GenerateRandomUpgrades()
     {
         //set all upgrade buttons,images, text here
-        upgrade1 = scriptableUpgrades[Random.Range(0, scriptableUpgrades.Count)];
-        upgrade2 = scriptableUpgrades[Random.Range(0, scriptableUpgrades.Count)];
-        upgrade3 = scriptableUpgrades[Random.Range(0, scriptableUpgrades.Count)];
+        List<ScriptableUpgrade> scriptableUpgrades = ShuffleList(ResourceSystem.Instance.scriptableUpgrades);
 
-        upgradeName1.text = upgrade1.name;
-        upgradeDescription1.text = upgrade1.upgradeDescription;
+        for (int i = 0; i < 3; i++)
+        {       
+            chosenUpgrades.Add(scriptableUpgrades[i]);
+        }        
+      
+        upgradeName1.text = chosenUpgrades[0].upgradeName;
+        upgradeDescription1.text = chosenUpgrades[0].upgradeDescription;
 
-        upgradeName2.text = upgrade2.name;
-        upgradeDescription2.text = upgrade2.upgradeDescription;
+        upgradeName2.text = chosenUpgrades[1].upgradeName;
+        upgradeDescription2.text = chosenUpgrades[1].upgradeDescription;
 
-        upgradeName3.text = upgrade3.name;
-        upgradeDescription3.text = upgrade3.upgradeDescription;
+        upgradeName3.text = chosenUpgrades[2].upgradeName;
+        upgradeDescription3.text = chosenUpgrades[2].upgradeDescription;
     }
 
-    private void DetermineUpgradeType(UpgradesScriptable upgrade)
+    // Fisher–Yates shuffle algo
+    private List<T> ShuffleList<T>(List<T> list)
+    {       
+       
+        for (int i = 0; i < list.Count; i++)
+        {
+            // Generate a random index within the remaining unshuffled elements
+            int randomIndex = Random.Range(0, list.Count);
+
+            //swap random index and i
+            T temp = list[i];
+            list[i] = list[randomIndex];
+            list[randomIndex] = temp;
+        }
+        return list;
+    }
+    private void DetermineUpgradeType(ScriptableUpgrade upgrade)
     {
         UpgradeType type = upgrade.upgradeType;
         switch (type)
@@ -71,8 +124,7 @@ public class UpgradeManager : MonoBehaviour
                 UpgradeStat(upgrade);
                 break;
             case UpgradeType.Ability:
-                break;
-            case UpgradeType.WeaponEnhancement:
+                Ability(upgrade);
                 break;
             case UpgradeType.Items:
                 break;
@@ -83,30 +135,31 @@ public class UpgradeManager : MonoBehaviour
 
     public void PickUpgrade1()
     {
-        DetermineUpgradeType(upgrade1);
-        LevelManager.Instance.UpdateGameState(LevelManager.Instance.currentWave);
+        DetermineUpgradeType(chosenUpgrades[0]);
+        LevelManager.Instance.UpdateGameState(GameState.SpawningWaves);
         onPickedUpgrade?.Invoke();
         Time.timeScale = 1;
+        
     }
 
     public void PickUpgrade2()
     {
-        DetermineUpgradeType(upgrade2);
-        LevelManager.Instance.UpdateGameState(LevelManager.Instance.currentWave);
+        DetermineUpgradeType(chosenUpgrades[1]);
+        LevelManager.Instance.UpdateGameState(GameState.SpawningWaves);
         onPickedUpgrade?.Invoke();
         Time.timeScale = 1;
     }
 
     public void PickUpgrade3()
     {
-        DetermineUpgradeType(upgrade3);
-        LevelManager.Instance.UpdateGameState(LevelManager.Instance.currentWave);
+        DetermineUpgradeType(chosenUpgrades[2]);
+        LevelManager.Instance.UpdateGameState(GameState.SpawningWaves);
         onPickedUpgrade?.Invoke();
         Time.timeScale = 1;
     }
 
-    private void Update()
+    private void OnDisable()
     {
-        
+        chosenUpgrades.Clear();
     }
 }

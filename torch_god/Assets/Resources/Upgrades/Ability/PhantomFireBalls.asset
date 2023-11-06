@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9db89d0dd3469246b9eefc39101ef19, type: 3}
+  m_Name: PhantomFireBalls
+  m_EditorClassIdentifier: 
+  upgradeType: 1
+  upgradePrefab: {fileID: 789339528715942436, guid: 97e45a5525e39fd40b1a26703ce7e562, type: 3}
+  needAim: 0
+  statModification:
+    health: 0
+    movementSpeed: 0
+    attack: 0
+    attackSpeed: 0
+    critChance: 0
+    pickUpRange: 0
+  upgradeName: Phantom FireBalls
+  upgradeDescription: Spawn random fireballs that will explode after a short period
+    of time
+  abilityDamage: 25

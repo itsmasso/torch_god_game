@@ -15,8 +15,8 @@ TagManager:
   - Ignore Colliders
   - Projectiles
   - Player
-  - 
-  - 
+  - Collider
+  - Obstacle
   - 
   - 
   - 
@@ -41,4 +41,7 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Top
+    uniqueID: 3531929783
     locked: 0

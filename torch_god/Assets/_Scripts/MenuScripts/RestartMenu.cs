@@ -11,6 +11,7 @@ public class RestartMenu : MonoBehaviour
 
     public void RestartGame()
     {
+        ResourceSystem.Instance.ResetPlayerData();
         GameManager.Instance.UpdateScene(1);
     }
 

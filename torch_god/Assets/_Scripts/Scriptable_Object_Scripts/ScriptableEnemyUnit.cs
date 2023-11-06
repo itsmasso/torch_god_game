@@ -30,5 +30,6 @@ public enum EnemyType
     enemy2,
     enemy3,
     Shade,
-    enemy5
+    enemy5,
+    Reaper
 }

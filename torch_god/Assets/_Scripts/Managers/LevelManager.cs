@@ -4,15 +4,12 @@ using UnityEngine;
 using System;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.Rendering.Universal;
 
 //all the states
 public enum GameState
 {
-    Wave1,
-    Wave2,
-    Wave3,
-    Wave4,
-    Wave5,
+    SpawningWaves,
     LevelUp,
     EndOfFloor,
     PlayerDied
@@ -21,84 +18,115 @@ public enum GameState
 //This singleton class will handle all of the game states of a level. For this class in particular, it will handle
 //all levels that spawn waves of enemies, level ups, player death, and level finishes. 
 public class LevelManager : Singleton<LevelManager>
-{
-    //bool for if you want to spawn in a test player
-    [SerializeField]
-    private bool testPlayer;
+{  
+    [Header("Testing")]
+    [SerializeField] private bool testPlayer;
 
-    private int timePerWave;
-    [SerializeField] private int totalTime = 300;
-
-    [SerializeField]
-    private TMP_Text currentLevel;
-    [SerializeField]
-    private TMP_Text currentXP;
-
+    [Header("Player Properties")]
+    public ScriptablePlayerUnit playerScriptable;
+    public ScriptableSaveData saveData;
+    public GameObject player;
     private Vector2 playerStartPosition;
 
-    public float minXBounds, maxXBounds, minYBounds, maxYBounds;
+    [Header("Time Properties")]
+    [SerializeField] private int totalTime = 300;
+    public float timer { get; private set; }
+    private bool timeIsRunning;
+    private int timePerWave;
 
+    [Header("Map Properties")]
+    public Light2D lights;
+    public float minXBounds, maxXBounds, minYBounds, maxYBounds;
+    [SerializeField] private GameObject ladder;
+    [SerializeField] private Transform mapTransform;
+
+    //events
+    public event Action onNewWave;
+    public event Action onEndOfFloor;
+    public event Action onPlayerDied;
+    public event Action onLevelUp;
     public static event Action<GameState> onBeforeStateChanged;
     public static event Action<GameState> onAfterStateChanged;
+    
 
-    public event Action onLevelUp;
+    [Header("UI Elements")]
     [SerializeField] private GameObject levelUpScreen;
     [SerializeField] private GameObject restartScreen;
     [SerializeField] private GameObject pauseScreen;
-
-    private bool wave1Triggered, wave2Triggered, wave3Triggered, wave4Triggered, wave5Triggered = false;
-
-    public event Action onWave1;
-    public event Action onWave2;
-    public event Action onWave3;
-    public event Action onWave4;
-    public event Action onWave5;
-    public event Action onEndOfFloor;
-    public event Action onPlayerDied;
-
-    public GameState state { get; private set; }
-    public ScriptablePlayerUnit playerScriptable;
-    public ScriptablePlayerData playerData;
-    public GameObject player;
-
-    public GameState currentWave { get; private set; }
-    public float timer { get; private set; }
+    [SerializeField] private TMP_Text currentLevelText;
+    [SerializeField] private TMP_Text currentXPText;
+    [SerializeField] private TMP_Text currentFloorText;
     public TMP_Text timeText;
-    private bool timeIsRunning;
 
+    [Header("Level Properties")]
     public bool isPaused;
+    public int currentWave = 0;
+    public GameState state { get; private set; }
+    private bool spawningWaves = false;
+    [SerializeField] private int amountOfWaves = 5;
+    public int currentFloor;
+
 
     protected override void Awake()
     {
         base.Awake();
-        timePerWave = totalTime / 5;
+        timePerWave = totalTime / amountOfWaves;
         if (testPlayer)
-        {
             playerScriptable = ResourceSystem.Instance.GetPlayerCharacter(Character.TorchCharacter);
-        }
         else
-        {
             playerScriptable = ResourceSystem.Instance.GetPlayerCharacter(GameManager.Instance.currentCharacter);
-        }
+        //init variables
         playerStartPosition = new Vector2((maxXBounds-minXBounds)/2+minXBounds, (maxYBounds - minYBounds) / 2 + minYBounds);
         player = Instantiate(playerScriptable.characterPrefab, (Vector3)playerStartPosition, Quaternion.identity);
+        saveData = ResourceSystem.Instance.saveData;
     }
     private void Start()
     {
-       
+
+        //set default timer properties
+        isPaused = false;
         timer = totalTime;
+        timeIsRunning = true;
         Time.timeScale = 1;
+
+        //set default ui elements
         restartScreen.SetActive(false);
         pauseScreen.SetActive(false);
-        timeIsRunning = true;
 
-        isPaused = false;
+        //setting level properties
+        currentWave++;    
+        currentFloor = saveData.playerData.currentFloor;
 
-        playerData = ResourceSystem.Instance.persistentPlayerData;
-        ResetPlayerData();
-        StartCoroutine(ChangeWaveState());
-        UpdateGameState(GameState.Wave1);
+        if (currentFloor == 0)
+            currentFloor = 1;
+
+        StartCoroutine(LevelCycle());
+        UpdateGameState(GameState.SpawningWaves);
+
+        //set player properties
+        foreach (int id in saveData.playerData.currentUpgradeIDs)
+        {
+            ReattatchUpgradesToPlayer(id);
+        }
     }
+    private void ReattatchUpgradesToPlayer(int id)
+    {
+        GameObject parent = player;
+        ScriptableUpgrade upgrade = ResourceSystem.Instance.GetUpgradeByID(id);
+        if (upgrade.needAim)
+        {
+            Weapon weaponReference = parent.GetComponentInChildren<Weapon>();
+            GameObject upgradeObj = Instantiate(upgrade.upgradePrefab, weaponReference.transform.position, weaponReference.firePoint.rotation);
+            upgradeObj.transform.parent = weaponReference.firePoint.transform;
+
+        }
+        else
+        {
+            GameObject upgradeObj = Instantiate(upgrade.upgradePrefab, parent.transform.position, Quaternion.identity);
+            upgradeObj.transform.parent = parent.transform;
+        }
+    }
+
     //updates gamestates
     public void UpdateGameState(GameState newState)
     {
@@ -107,26 +135,9 @@ public class LevelManager : Singleton<LevelManager>
         
         switch (newState)
         {
-            case GameState.Wave1:
+            case GameState.SpawningWaves:
                 levelUpScreen.SetActive(false);
-                HandleWave1();
-                
-                break;
-            case GameState.Wave2:
-                levelUpScreen.SetActive(false);
-                HandleWave2();
-                break;
-            case GameState.Wave3:
-                levelUpScreen.SetActive(false);
-                HandleWave3();
-                break;
-            case GameState.Wave4:
-                levelUpScreen.SetActive(false);
-                HandleWave4();
-                break;
-            case GameState.Wave5:
-                levelUpScreen.SetActive(false);
-                HandleWave5();
+                HandleSpawningWaves();
                 break;
             case GameState.EndOfFloor:
                 levelUpScreen.SetActive(false);
@@ -149,88 +160,51 @@ public class LevelManager : Singleton<LevelManager>
         Time.timeScale = 0;
         levelUpScreen.SetActive(true);
         onLevelUp?.Invoke();
+        
+        //Note: Refer to UpgradeManager script for logic below
         //pause game and open level up screen
-        //after choosing new upgrade, resume game and updateGamestate based on current wave
+        //after choosing new upgrade, resume game
     }
 
     //functions for handling states
-    private void HandleWave1()
-    {
-        
-        if (!wave1Triggered)
+    private void HandleSpawningWaves()
+    {      
+        if (!spawningWaves)
         {
-            Debug.Log("Wave 1");
-            currentWave = GameState.Wave1;
-            onWave1?.Invoke();
-            wave1Triggered = true;
+            onNewWave?.Invoke();
+            spawningWaves = true;
         }
         
     }
-
-    private void HandleWave2()
-    {    
-        if (!wave2Triggered)
-        {
-            Debug.Log("Wave 2");
-            currentWave = GameState.Wave2;
-            onWave2?.Invoke();
-            wave2Triggered = true;
-        }
-    }
-
-    private void HandleWave3()
-    {
-        if (!wave3Triggered)
-        {
-            Debug.Log("Wave 3");
-            currentWave = GameState.Wave3;
-            onWave3?.Invoke();
-            wave3Triggered = true;
-        }
-    }
-    private void HandleWave4()
-    {
-        if (!wave4Triggered)
-        {
-            Debug.Log("Wave 4");
-            currentWave = GameState.Wave4;
-            onWave4?.Invoke();
-            wave4Triggered = true;
-        }
-    }
-    private void HandleWave5()
-    {
-        if (!wave5Triggered)
-        {
-            Debug.Log("Wave 5");
-            currentWave = GameState.Wave5;
-            onWave5?.Invoke();
-            wave5Triggered = true;
-        }
-    }
-
     private void HandleEndOfFloor()
     {
         Debug.Log("End of floor");
         onEndOfFloor?.Invoke();
-    }
-    private void ResetPlayerData()
-    {
-        playerData.health = 0;
-        playerData.attack = 0;
-        playerData.critChance = 0;
-        playerData.currentLevel = 1;
-        playerData.pickUpRange = 0;
-        playerData.movementSpeed = 0;
-        playerData.currentExperience = 0;
-        playerData.maxExperience = 0;
-        playerData.currentUpgrades.Clear();
-    }
+        Instantiate(ladder, mapTransform.position, Quaternion.identity);
+        
+    }   
     private void HandlePlayerDied()
     {     
         restartScreen.SetActive(true);
+        ResourceSystem.Instance.ResetPlayerData();
         Time.timeScale = 0;
 
+    }
+
+    public void IncrementFloors()
+    {
+        currentFloor++;
+        saveData.playerData.currentFloor = currentFloor;
+        if (currentFloor % 5 == 0)
+        {      
+            GameManager.Instance.IncrementLevel();
+            GameManager.Instance.NewScene();
+        }
+        else
+        {
+            GameManager.Instance.NewScene();
+        }
+        
     }
 
     //temporary method, will use input system to handle ui inputs
@@ -266,20 +240,23 @@ public class LevelManager : Singleton<LevelManager>
 
     private void DisplayXP()
     {
-        currentLevel.text = string.Format("Level: {0}", playerData.currentLevel);
-        currentXP.text = string.Format("{0} / {1}", playerData.currentExperience, playerData.maxExperience);
+        currentLevelText.text = string.Format("Level: {0}", saveData.playerData.currentLevel);
+        currentXPText.text = string.Format("{0} / {1}", saveData.playerData.currentExperience, saveData.playerData.maxExperience);
   
     }
 
-    private IEnumerator ChangeWaveState()
+    private void DisplayFloor()
+    {
+        currentFloorText.text = string.Format("Floor {0}", currentFloor);
+    }
+
+    private IEnumerator LevelCycle()
     {
         while (timer > 0)
         {
             yield return new WaitForSeconds(timePerWave);
-            if(currentWave != GameState.Wave5)
-            {
-                UpdateGameState(currentWave + 1);
-            }
+            currentWave++;
+            onNewWave?.Invoke();          
         }
         UpdateGameState(GameState.EndOfFloor);
     }
@@ -295,6 +272,9 @@ public class LevelManager : Singleton<LevelManager>
             DisplayTime();
         }
         DisplayXP();
-        
+        DisplayFloor();
+
     }
+
+
 }
