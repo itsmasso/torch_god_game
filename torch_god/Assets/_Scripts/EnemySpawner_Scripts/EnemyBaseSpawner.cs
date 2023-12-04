@@ -57,7 +57,7 @@ public abstract class EnemyBaseSpawner : MonoBehaviour
     {
         //In this method we can find a random spawn position of screen by finding the half camera height and width.
         //Then based on a random direction generated using enums, we add the half camera height and width + padding 
-        //If the spawn manages to land off screen, then we try spawning it on the opposite side instead
+        //If the spawn manages to land off out of map bounds, then we try spawning it on the opposite side instead
 
         randomDirection = (SpawnDirections)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(SpawnDirections)).Length);
 
