@@ -17,13 +17,13 @@ public class TorchLevel1Projectile : ProjectileBase
     }
     protected override void DamageHitBox()
     {
-        RaycastHit2D hit = Physics2D.CircleCast(transform.position, radius, transform.position.normalized, 0, enemyLayer);
+        RaycastHit2D hit = Physics2D.CircleCast(transform.position, radius, transform.position.normalized, 0, targetLayer);
         if (hit.collider != null)
         {
             IDamageable damageable = hit.collider.GetComponent<IDamageable>();
             if (damageable != null)
             {
-                damageable.Damage(damageAmount);
+                damageable.TakeDamage(damageAmount);
             }
             AoeHitBox();
             if (anim != null && hasDestroyAnimation)
@@ -47,7 +47,7 @@ public class TorchLevel1Projectile : ProjectileBase
                 IDamageable damageable = results[i].collider.GetComponent<IDamageable>();
                 if (damageable != null)
                 {
-                    damageable.Damage(damageAmount);
+                    damageable.TakeDamage(damageAmount);
                 }
 
 

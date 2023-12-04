@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upgradeType: 1
   upgradePrefab: {fileID: 6255725484346152655, guid: d3c2390d50070564285594f23c123f49, type: 3}
+  upgradeIcon: {fileID: 8293654049076628364, guid: 66e1709a2b32ef344a541a2788927b12, type: 3}
   needAim: 1
   statModification:
     health: 0
@@ -24,4 +25,5 @@ MonoBehaviour:
     pickUpRange: 0
   upgradeName: Mini Fireballs
   upgradeDescription: Shoot 2 fireballs that target enemies
-  abilityDamage: 15
+  baseDamage: 5
+  level: 0

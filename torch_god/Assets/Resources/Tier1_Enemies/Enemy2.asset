@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyType: 3
   enemyStats:
-    movementSpeed: 5
+    movementSpeed: 3
     health: 100
     attack: 15
     xpDropped: 15

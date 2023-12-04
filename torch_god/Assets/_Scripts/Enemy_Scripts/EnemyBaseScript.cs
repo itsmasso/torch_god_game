@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -21,7 +22,7 @@ public abstract class EnemyBaseScript : MonoBehaviour, IDamageable
     public int xpAmountDropped { get; protected set; }
     protected int maxHealth;
     public int currentHealth { get; protected set; }
-    public static Action<int> onDealDamage;
+    //public static Action<int> onEnemyDealDamage;
 
     [Header("References")]
     //player reference
@@ -30,6 +31,7 @@ public abstract class EnemyBaseScript : MonoBehaviour, IDamageable
     [SerializeField] protected SpriteRenderer sprite;
     public EnemyAnimations enemyAnimations;
     public EnemyContextSteeringAI contextSteeringAI;
+    public bool useContextSteering = true;
 
     //its enemy object pool
     public EnemyUnitPool enemyPool;
@@ -38,33 +40,41 @@ public abstract class EnemyBaseScript : MonoBehaviour, IDamageable
     public float stopDistance = 1;
     protected Vector2 moveDir;
 
+    public static Action onDeath;
+
     //[Header("State Properties")]
-    EnemyBaseState currentState;
+    public EnemyBaseState currentState;
     public EnemyChaseState enemyChaseState = new EnemyChaseState();
     public EnemyAttackState enemyAttackState = new EnemyAttackState();
     public EnemyHurtState enemyHurtState = new EnemyHurtState();
 
-    public static Action onDeath;
+    protected virtual void Awake()
+    {
+        if (LevelManager.Instance != null)
+        {
+            player = LevelManager.Instance.player;
 
+        }
+    }
     protected virtual void Start()
     {
         currentState = enemyChaseState;
         currentState.EnterState(this);
-
-        player = LevelManager.Instance.player;
+        if(LevelManager.Instance != null)
+        {
+            LevelManager.Instance.onEndOfFloor += EndofFloorDeath;
+        }
         xpAmountDropped = enemyStats.xpDropped;
         maxHealth = enemyStats.health;
         currentHealth = maxHealth;
         speed = enemyStats.movementSpeed;
-
-
+       
     }
 
     protected virtual void OnEnable()
     {
         currentState = enemyChaseState;
         currentState.EnterState(this);
-
         maxHealth = enemyStats.health;
         currentHealth = maxHealth;
         speed = enemyStats.movementSpeed;
@@ -92,21 +102,34 @@ public abstract class EnemyBaseScript : MonoBehaviour, IDamageable
         GameObject xpObject = Instantiate(xpPrefab, transform.position, Quaternion.identity);
         xpObject.GetComponent<LightCrystalXP>().xpAmount = xpAmountDropped;
         onDeath?.Invoke();
-        enemyPool.pool.Release(gameObject);
+        if(enemyPool != null)
+        {
+            enemyPool.pool.Release(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
         
     }
 
-    public int DealDamage(int amount)
+    protected virtual void EndofFloorDeath()
     {
-        float randomDamageMultiplier = 0.3f; //randomizes damage. A higher multiplier creates a more random damage number and higher range
+        //play death animation
+        Destroy(gameObject);
+        
+    }
+
+    public int GenerateDamageAmount(int amount)
+    {
+        float randomDamageMultiplier = 0.1f; //randomizes damage. A higher multiplier creates a more random damage number and higher range
         int randomDamage = UnityEngine.Random.Range(amount - Mathf.RoundToInt(amount * randomDamageMultiplier), amount + Mathf.RoundToInt(amount * randomDamageMultiplier));
         return randomDamage;
     }
 
-    public void Damage(int damageAmount)
+    public virtual void TakeDamage(int damageAmount)
     {
         SwitchState(enemyHurtState);
-
         DamagePopup.Create(transform.position, damageAmount, false);
         if (currentHealth <= 0)
         {
@@ -121,6 +144,7 @@ public abstract class EnemyBaseScript : MonoBehaviour, IDamageable
     protected void OnDestroy()
     {
         onDeath?.Invoke();
+        LevelManager.Instance.onEndOfFloor -= EndofFloorDeath;
     }
 
 }

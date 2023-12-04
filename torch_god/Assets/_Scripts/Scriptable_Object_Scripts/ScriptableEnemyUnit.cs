@@ -31,5 +31,7 @@ public enum EnemyType
     enemy3,
     Shade,
     enemy5,
-    Reaper
+    Reaper,
+    enemy4,
+    HealingUnit1
 }

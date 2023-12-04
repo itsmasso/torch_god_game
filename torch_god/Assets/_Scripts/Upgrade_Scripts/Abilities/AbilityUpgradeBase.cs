@@ -25,7 +25,7 @@ public abstract class AbilityUpgradeBase : MonoBehaviour
 
     protected int GenerateDamageAmount(int amount)
     {
-        float randomDamageMultiplier = 0.3f; //randomizes damage. A higher multiplier creates a more random damage number and higher range
+        float randomDamageMultiplier = 0.1f; //randomizes damage. A higher multiplier creates a more random damage number and higher range
         int randomDamage = UnityEngine.Random.Range(amount - Mathf.RoundToInt(amount * randomDamageMultiplier), amount + Mathf.RoundToInt(amount * randomDamageMultiplier));
         return randomDamage;
     }

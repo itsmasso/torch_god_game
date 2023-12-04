@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 
 public class Torch_Weapon : Weapon
 {
+
     [Header("Fireball Prefabs")]
     [SerializeField]
     protected GameObject basicFireballPrefab;
@@ -57,7 +58,7 @@ public class Torch_Weapon : Weapon
             GameObject projectile = Instantiate(basicFireballPrefab, firePoint.position, firePoint.rotation);
             TorchLevel1Projectile projectileScript = projectile.GetComponent<TorchLevel1Projectile>();
             projectileScript.damageAmount = GenerateDamageAmount(player.attack);
-            AudioManager.Instance.PlaySFX("BasicFireBall");
+            //AudioManager.Instance.PlaySFX("BasicFireBall");
             yield return new WaitForSeconds(shootInterval / player.attackSpeed);
         }
         

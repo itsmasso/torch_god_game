@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upgradeType: 1
   upgradePrefab: {fileID: 789339528715942436, guid: 97e45a5525e39fd40b1a26703ce7e562, type: 3}
+  upgradeIcon: {fileID: 4243245982263922064, guid: fb7a80cc13c7e1c438045b2e8579efa5, type: 3}
   needAim: 0
   statModification:
     health: 0
@@ -22,7 +23,8 @@ MonoBehaviour:
     attackSpeed: 0
     critChance: 0
     pickUpRange: 0
-  upgradeName: Phantom FireBalls
-  upgradeDescription: Spawn random fireballs that will explode after a short period
-    of time
-  abilityDamage: 25
+  upgradeName: Phantom Fire
+  upgradeDescription: Summon Fireballs at random locations that explode after a short
+    period of time.
+  baseDamage: 15
+  level: 0

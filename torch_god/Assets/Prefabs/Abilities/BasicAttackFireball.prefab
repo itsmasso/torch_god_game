@@ -279,10 +279,9 @@ MonoBehaviour:
   radius: 0.5
   timeBeforeDestroy: 2
   projectileSpeed: 13
-  damageAmount: 0
   anim: {fileID: 3218204906750813162}
   hasDestroyAnimation: 0
-  enemyLayer:
+  targetLayer:
     serializedVersion: 2
     m_Bits: 8
   contactFilter:

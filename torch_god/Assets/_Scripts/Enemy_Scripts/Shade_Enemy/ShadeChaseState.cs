@@ -20,7 +20,14 @@ public class ShadeChaseState : ShadeBaseState
         }
         else
         {
-            moveDir = shade.contextSteeringAI.GetDirectionToMove();
+            if (shade.useContextSteering && shade.contextSteeringAI.playerTransform != null)
+            {
+                moveDir = shade.contextSteeringAI.GetDirectionToMove();
+            }
+            else
+            {
+                moveDir = (shade.player.transform.position - shade.transform.position).normalized;
+            }
             shade.transform.position = (Vector2)shade.transform.position + moveDir * shade.speed * Time.deltaTime;
         }
 

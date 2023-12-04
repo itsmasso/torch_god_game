@@ -20,7 +20,12 @@ public class EnemyAttackState : EnemyBaseState
             {
                 //call event to deal damage to player
                 enemy.enemyAnimations.PlayAttackAnimation();
-                EnemyBaseScript.onDealDamage?.Invoke(enemy.DealDamage(enemy.enemyStats.attack));
+                IDamageable damageable = enemy.player.GetComponent<IDamageable>();
+                if (damageable != null)
+                {
+                    damageable.TakeDamage(enemy.GenerateDamageAmount(enemy.enemyStats.attack));
+                }
+                //EnemyBaseScript.onEnemyDealDamage?.Invoke(enemy.DealDamage(enemy.enemyStats.attack));
                 lastAttackTime = Time.time;
             }
 

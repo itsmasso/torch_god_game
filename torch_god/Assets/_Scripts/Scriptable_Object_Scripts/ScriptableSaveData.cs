@@ -15,6 +15,11 @@ public class ReturnSaveData
     public SaveData playerData { get; set; }
 }
 
+public class UpgradeData
+{
+    public int id;
+    public int level;
+}
 
 [System.Serializable]
 public class SaveData
@@ -29,7 +34,8 @@ public class SaveData
     public int currentExperience;
     public int maxExperience;
     public int currentLevel;
-    public List<int> currentUpgradeIDs = new List<int>();
+    //public List<int> currentUpgradeIDs = new List<int>();
+    public List<UpgradeData> currentUpgrades = new List<UpgradeData>();
     public Character character;
     public int currentGameLevel;
     public int currentFloor;

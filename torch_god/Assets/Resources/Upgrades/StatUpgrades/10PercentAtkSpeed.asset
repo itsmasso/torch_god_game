@@ -14,14 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upgradeType: 0
   upgradePrefab: {fileID: 0}
+  upgradeIcon: {fileID: 0}
   needAim: 0
   statModification:
     health: 0
     movementSpeed: 0
     attack: 0
-    attackSpeed: 0.3
+    attackSpeed: 0.1
     critChance: 0
     pickUpRange: 0
   upgradeName: Attack Speed
-  upgradeDescription: Gain 30% Attack Speed
-  abilityDamage: 0
+  upgradeDescription: Gain 10% Attack Speed
+  baseDamage: 0
+  level: 0

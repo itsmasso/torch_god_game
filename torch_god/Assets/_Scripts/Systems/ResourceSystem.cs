@@ -12,9 +12,11 @@ public class ResourceSystem : Singleton<ResourceSystem>
     public ScriptableSaveData saveData { get; private set; }
 
     public List<ScriptableEnemyUnit> tier1Enemies { get; private set; }
+    public List<ScriptableEnemyUnit> tier2Enemies { get; private set; }
 
     public List<ScriptableUpgrade> scriptableUpgrades = new List<ScriptableUpgrade>();
     private Dictionary<int, ScriptableUpgrade> scriptableUpgradesDict = new Dictionary<int, ScriptableUpgrade>();
+  
 
     public GameObject damagePopup { get; private set; }
     protected override void Awake()
@@ -36,6 +38,7 @@ public class ResourceSystem : Singleton<ResourceSystem>
             scriptableUpgradesDict.Add(i, scriptableUpgrades[i]);
         }
         tier1Enemies = Resources.LoadAll<ScriptableEnemyUnit>("Tier1_Enemies").ToList();
+        tier2Enemies = Resources.LoadAll<ScriptableEnemyUnit>("Tier2_Enemies").ToList();
 
         damagePopup = Resources.Load<GameObject>("Game_Assets/DamagePopUp");
         scriptablePlayerCharacters = Resources.LoadAll<ScriptablePlayerUnit>("Player_Characters").ToList();
@@ -71,14 +74,14 @@ public class ResourceSystem : Singleton<ResourceSystem>
         saveData.playerData.movementSpeed = 0;
         saveData.playerData.currentExperience = 0;
         saveData.playerData.maxExperience = 0;
-        if(saveData.playerData.currentUpgradeIDs.Count != 0)
+        if(saveData.playerData.currentUpgrades.Count != 0)
         {
-            foreach (int id in saveData.playerData.currentUpgradeIDs)
+            foreach (UpgradeData upgrade in saveData.playerData.currentUpgrades)
             {
-                GetUpgradeByID(id).level = 0;
+                GetUpgradeByID(upgrade.id).level = 0;
             }
         }
-        saveData.playerData.currentUpgradeIDs.Clear();
+        saveData.playerData.currentUpgrades.Clear();
         saveData.playerData.currentGameLevel = 1;
         saveData.playerData.currentFloor = 1;
 

@@ -81,12 +81,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91d7248f3958105458e1124c2bea9257, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radius: 3
-  timeBeforeDestroy: 2.1
+  radius: 5
+  timeBeforeDestroy: 1.6
   projectileSpeed: 0
   anim: {fileID: 5762754495221770412}
   hasDestroyAnimation: 1
-  enemyLayer:
+  targetLayer:
     serializedVersion: 2
     m_Bits: 8
   enemyContactFilter:
@@ -104,7 +104,7 @@ MonoBehaviour:
     minNormalAngle: 0
     maxNormalAngle: 0
   showGizmos: 0
-  fieldTime: 2
+  fieldTime: 1.5
 --- !u!1 &5618007468634043356
 GameObject:
   m_ObjectHideFlags: 0

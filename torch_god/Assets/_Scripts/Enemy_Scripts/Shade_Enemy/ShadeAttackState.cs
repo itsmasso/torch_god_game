@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
+
 
 public class ShadeAttackState : ShadeBaseState
 {
@@ -22,7 +22,7 @@ public class ShadeAttackState : ShadeBaseState
             {
                 //call event to deal damage to player
                 shade.enemyAnimations.PlayAttackAnimation();
-                onDealDamage?.Invoke(shade.DealDamage(shade.enemyStats.attack));
+                onDealDamage?.Invoke(shade.GenerateDamageAmount(shade.enemyStats.attack));
                 lastAttackTime = Time.time;
             }
 

@@ -23,7 +23,7 @@ public class Shade_Script : EnemyBaseScript
 
     public float teleportStopDistance;
 
-    ShadeBaseState currentShadeState;
+    public ShadeBaseState currentShadeState;
     public ShadeChaseState shadeChaseState = new ShadeChaseState();
     public ShadeAttackState shadeAttackState = new ShadeAttackState();
     public ShadeHurtState shadeHurtState = new ShadeHurtState();
@@ -36,8 +36,8 @@ public class Shade_Script : EnemyBaseScript
     protected override void Start()
     {
         canTeleport = true;
-        currentShadeState = shadeChaseState;
-        currentShadeState.EnterState(this);
+        currentState = enemyChaseState;
+        currentState.EnterState(this);
         player = LevelManager.Instance.player;
         xpAmountDropped = enemyStats.xpDropped;
         maxHealth = enemyStats.health;

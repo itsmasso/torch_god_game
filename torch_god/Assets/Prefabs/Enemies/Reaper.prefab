@@ -176,6 +176,7 @@ MonoBehaviour:
   sprite: {fileID: 5625746202299697338}
   enemyAnimations: {fileID: 5541831467292908837}
   contextSteeringAI: {fileID: 4476921140964818628}
+  useContextSteering: 0
   enemyPool: {fileID: 0}
   stopDistance: 2
   skillRadius: 6

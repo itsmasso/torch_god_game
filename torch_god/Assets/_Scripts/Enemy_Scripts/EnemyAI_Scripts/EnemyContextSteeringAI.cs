@@ -75,20 +75,23 @@ public class EnemyContextSteeringAI : MonoBehaviour
     {
         foreach (Collider2D obstacleCollider in obstacles)
         {
-            Vector2 directionToObstacle = obstacleCollider.ClosestPoint(transform.position) - (Vector2)transform.position;
-            float distanceToObstacle = directionToObstacle.magnitude;
-
-            float weight = distanceToObstacle <= agentColliderSize ? 1 : (radius - distanceToObstacle) / radius;
-
-            Vector2 directionToObstacleNormalized = directionToObstacle.normalized;
-
-            for (int i = 0; i < Directions.eightDirections.Count; i++)
+            if(obstacleCollider != null)
             {
-                float result = Vector2.Dot(directionToObstacleNormalized, Directions.eightDirections[i]);
-                float valueInput = result * weight;
-                if (valueInput > danger[i])
+                Vector2 directionToObstacle = obstacleCollider.ClosestPoint(transform.position) - (Vector2)transform.position;
+                float distanceToObstacle = directionToObstacle.magnitude;
+
+                float weight = distanceToObstacle <= agentColliderSize ? 1 : (radius - distanceToObstacle) / radius;
+
+                Vector2 directionToObstacleNormalized = directionToObstacle.normalized;
+
+                for (int i = 0; i < Directions.eightDirections.Count; i++)
                 {
-                    danger[i] = valueInput;
+                    float result = Vector2.Dot(directionToObstacleNormalized, Directions.eightDirections[i]);
+                    float valueInput = result * weight;
+                    if (valueInput > danger[i])
+                    {
+                        danger[i] = valueInput;
+                    }
                 }
             }
         }

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.RuleTile.TilingRuleOutput;
+
 
 
 public class EnemyChaseState : EnemyBaseState
@@ -18,7 +18,14 @@ public class EnemyChaseState : EnemyBaseState
         //add an update delay for using context steering to maybe improve performance
         if (Vector2.Distance(enemy.transform.position, enemy.player.transform.position) >= enemy.stopDistance)
         {
-            moveDir = enemy.contextSteeringAI.GetDirectionToMove();
+            if (enemy.useContextSteering && enemy.contextSteeringAI.playerTransform != null)
+            {
+                moveDir = enemy.contextSteeringAI.GetDirectionToMove();
+            }
+            else
+            {
+                moveDir = (enemy.player.transform.position - enemy.transform.position).normalized;
+            }
             enemy.transform.position = (Vector2)enemy.transform.position + moveDir * enemy.speed * Time.deltaTime;
         }
         else

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9db89d0dd3469246b9eefc39101ef19, type: 3}
+  m_Name: LuminalSpiral
+  m_EditorClassIdentifier: 
+  upgradeType: 1
+  upgradePrefab: {fileID: 4116211134488472800, guid: 02447d4a0bf83fa4fab51ff557c52eab, type: 3}
+  upgradeIcon: {fileID: 1582411898706890360, guid: 3304134b37feb3944aa71a1582fc90c0, type: 3}
+  needAim: 0
+  statModification:
+    health: 0
+    movementSpeed: 0
+    attack: 0
+    attackSpeed: 0
+    critChance: 0
+    pickUpRange: 0
+  upgradeName: Luminal Spiral
+  upgradeDescription: Shoots a ball of light that bounces off of enemies.
+  baseDamage: 5
+  level: 0

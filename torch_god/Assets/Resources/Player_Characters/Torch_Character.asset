@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   character: 0
   baseStats:
-    health: 300
-    movementSpeed: 8
-    attack: 50
+    health: 150
+    movementSpeed: 5
+    attack: 35
     attackSpeed: 1
     critChance: 0
     pickUpRange: 5

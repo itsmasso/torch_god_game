@@ -31,7 +31,7 @@ public abstract class Weapon : MonoBehaviour
 
     protected virtual int GenerateDamageAmount(int amount)
     {
-        float randomDamageMultiplier = 0.3f; //randomizes damage. A higher multiplier creates a more random damage number and higher range
+        float randomDamageMultiplier = 0.1f; 
         int randomDamage = Random.Range(amount - Mathf.RoundToInt(amount * randomDamageMultiplier), amount + Mathf.RoundToInt(amount * randomDamageMultiplier));
         return randomDamage;
     }

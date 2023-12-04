@@ -138,10 +138,9 @@ MonoBehaviour:
   radius: 0.5
   timeBeforeDestroy: 2
   projectileSpeed: 10
-  damageAmount: 0
   anim: {fileID: 4885796024135646558}
   hasDestroyAnimation: 0
-  enemyLayer:
+  targetLayer:
     serializedVersion: 2
     m_Bits: 8
   followRadius: 15

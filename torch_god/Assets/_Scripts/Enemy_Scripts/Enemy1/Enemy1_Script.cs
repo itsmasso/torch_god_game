@@ -4,15 +4,24 @@ using UnityEngine;
 
 public class Enemy1_Script : EnemyBaseScript
 {
-    
+
+
     protected override void Start()
     {
         base.Start();
     }
 
-    
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+    }
+
+
     protected override void Update()
     {
+        
         base.Update();
     }
+
+
 }

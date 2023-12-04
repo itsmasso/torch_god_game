@@ -5,6 +5,7 @@ using System;
 using UnityEngine.SceneManagement;
 using TMPro;
 using UnityEngine.Rendering.Universal;
+using static UpgradeManager;
 
 //all the states
 public enum GameState
@@ -38,7 +39,8 @@ public class LevelManager : Singleton<LevelManager>
     public Light2D lights;
     public float minXBounds, maxXBounds, minYBounds, maxYBounds;
     [SerializeField] private GameObject ladder;
-    [SerializeField] private Transform mapTransform;
+    [SerializeField] private float ladderSpawnRadius = 8f;
+    
 
     //events
     public event Action onNewWave;
@@ -47,7 +49,6 @@ public class LevelManager : Singleton<LevelManager>
     public event Action onLevelUp;
     public static event Action<GameState> onBeforeStateChanged;
     public static event Action<GameState> onAfterStateChanged;
-    
 
     [Header("UI Elements")]
     [SerializeField] private GameObject levelUpScreen;
@@ -57,6 +58,8 @@ public class LevelManager : Singleton<LevelManager>
     [SerializeField] private TMP_Text currentXPText;
     [SerializeField] private TMP_Text currentFloorText;
     public TMP_Text timeText;
+    [SerializeField] private UpgradesUIBar uiBar;
+    [SerializeField] private GameObject unfinishedText;
 
     [Header("Level Properties")]
     public bool isPaused;
@@ -65,6 +68,7 @@ public class LevelManager : Singleton<LevelManager>
     private bool spawningWaves = false;
     [SerializeField] private int amountOfWaves = 5;
     public int currentFloor;
+    private bool switchedToEndOfFloor;
 
 
     protected override void Awake()
@@ -82,7 +86,7 @@ public class LevelManager : Singleton<LevelManager>
     }
     private void Start()
     {
-
+  
         //set default timer properties
         isPaused = false;
         timer = totalTime;
@@ -92,10 +96,12 @@ public class LevelManager : Singleton<LevelManager>
         //set default ui elements
         restartScreen.SetActive(false);
         pauseScreen.SetActive(false);
+        unfinishedText.SetActive(false);
 
         //setting level properties
         currentWave++;    
         currentFloor = saveData.playerData.currentFloor;
+        switchedToEndOfFloor = false;
 
         if (currentFloor == 0)
             currentFloor = 1;
@@ -104,12 +110,18 @@ public class LevelManager : Singleton<LevelManager>
         UpdateGameState(GameState.SpawningWaves);
 
         //set player properties
-        foreach (int id in saveData.playerData.currentUpgradeIDs)
+        /*
+        foreach(int id in saveData.playerData.currentUpgradeIDs)
         {
             ReattatchUpgradesToPlayer(id);
         }
+        */
+        foreach(UpgradeData upgrades in saveData.playerData.currentUpgrades)
+        {
+            ReattatchUpgradesToPlayer(upgrades.id, upgrades.level);
+        }
     }
-    private void ReattatchUpgradesToPlayer(int id)
+    private void ReattatchUpgradesToPlayer(int id, int level)
     {
         GameObject parent = player;
         ScriptableUpgrade upgrade = ResourceSystem.Instance.GetUpgradeByID(id);
@@ -118,13 +130,19 @@ public class LevelManager : Singleton<LevelManager>
             Weapon weaponReference = parent.GetComponentInChildren<Weapon>();
             GameObject upgradeObj = Instantiate(upgrade.upgradePrefab, weaponReference.transform.position, weaponReference.firePoint.rotation);
             upgradeObj.transform.parent = weaponReference.firePoint.transform;
+            upgradeObj.GetComponent<AbilityUpgradeBase>().currentLevel = level;
+            uiBar.AddUpgradeIcon(upgrade, upgradeObj);
 
         }
         else
         {
             GameObject upgradeObj = Instantiate(upgrade.upgradePrefab, parent.transform.position, Quaternion.identity);
             upgradeObj.transform.parent = parent.transform;
+            upgradeObj.GetComponent<AbilityUpgradeBase>().currentLevel = level;
+            uiBar.AddUpgradeIcon(upgrade, upgradeObj);
         }
+
+        
     }
 
     //updates gamestates
@@ -180,7 +198,10 @@ public class LevelManager : Singleton<LevelManager>
     {
         Debug.Log("End of floor");
         onEndOfFloor?.Invoke();
-        Instantiate(ladder, mapTransform.position, Quaternion.identity);
+        float randomAngle = UnityEngine.Random.Range(0f, 360f);
+        Vector2 randomDirection = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle));
+        //TODO: If spawn is outside borders, make sure to spawn inside
+        Instantiate(ladder, (Vector2)player.transform.position + randomDirection * ladderSpawnRadius, Quaternion.identity);
         
     }   
     private void HandlePlayerDied()
@@ -194,11 +215,17 @@ public class LevelManager : Singleton<LevelManager>
     public void IncrementFloors()
     {
         currentFloor++;
+        if(currentFloor >= 6)
+        {
+            currentFloor = 6;
+        }
         saveData.playerData.currentFloor = currentFloor;
-        if (currentFloor % 5 == 0)
-        {      
-            GameManager.Instance.IncrementLevel();
-            GameManager.Instance.NewScene();
+        if (currentFloor % 6 == 0)
+        {
+            //need to implement next level
+            unfinishedText.SetActive(true);
+            //GameManager.Instance.IncrementLevel();
+            //GameManager.Instance.NewScene();
         }
         else
         {
@@ -258,7 +285,7 @@ public class LevelManager : Singleton<LevelManager>
             currentWave++;
             onNewWave?.Invoke();          
         }
-        UpdateGameState(GameState.EndOfFloor);
+        
     }
     private void Update()
     {
@@ -273,6 +300,16 @@ public class LevelManager : Singleton<LevelManager>
         }
         DisplayXP();
         DisplayFloor();
+
+        if (Mathf.FloorToInt(timer) <= 0)
+        {
+            if (!switchedToEndOfFloor)
+            {
+                
+                UpdateGameState(GameState.EndOfFloor);
+                switchedToEndOfFloor = true;
+            }
+        }
 
     }
 

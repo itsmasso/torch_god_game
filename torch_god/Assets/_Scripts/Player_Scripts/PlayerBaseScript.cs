@@ -1,15 +1,14 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.U2D;
+
 
 //Base script for player class. All playable characters inherit this class
-public abstract class PlayerBaseScript : MonoBehaviour
+public abstract class PlayerBaseScript : MonoBehaviour, IDamageable
 {
     public static event Action<int> onLevelUp;
+    public static event Action<int> onTakeDamage;
 
     [Header("Movement Properties")]
     public Vector2 velocity;
@@ -34,7 +33,7 @@ public abstract class PlayerBaseScript : MonoBehaviour
     public PlayerStats stats { get; private set; }
     //own struct of stats independent of this class. can modify without changing base stats 
     //add implementation for stat modification here
-    protected int maxHealth;
+    public int maxHealth { get; private set; }
     public int currentHealth { get; private set; }
     public float speed { get; private set; }
     public int attack { get; private set; }
@@ -59,9 +58,10 @@ public abstract class PlayerBaseScript : MonoBehaviour
         sprite.material = originalMaterial;
 
         //Subscribing to events
-        EnemyBaseScript.onDealDamage += TakeDamage;
+        //EnemyBaseScript.onEnemyDealDamage += TakeDamage;
         LightCrystalXP.onReceiveXP += HandleXP;
         UpgradeManager.onPickedUpgrade += UpdateStats;
+        HealingUnitScript.onDeath += HealPlayer;
     }
 
     //UpdateStats will update the stats according to recent stat modifications. 
@@ -86,10 +86,13 @@ public abstract class PlayerBaseScript : MonoBehaviour
         flashRoutine = null;
     }
 
-    //This if statement ensures that we can restart the flash animation upon getting hit again
-    public void TakeDamage(int amount)
-    {       
-        if(flashRoutine != null)
+
+    public void TakeDamage(int damageAmount)
+    {
+        onTakeDamage?.Invoke(damageAmount);
+
+        //This if statement ensures that we can restart the flash animation upon getting hit again
+        if (flashRoutine != null)
         {
             StopCoroutine(flashRoutine);
         }
@@ -106,7 +109,7 @@ public abstract class PlayerBaseScript : MonoBehaviour
         }
         else
         {
-            currentHealth -= amount;
+            currentHealth -= damageAmount;
         }
     }
 
@@ -118,15 +121,31 @@ public abstract class PlayerBaseScript : MonoBehaviour
     protected virtual void FixedUpdate()
     {
         //Here we can tell the animator whether we are moving or not by checking our user inputs (in the form of velocity variable)
-        if (velocity != Vector2.zero)
+        if(anim != null)
         {
-            anim.SetBool("IsMoving", true);
-        }
-        else
-        {
-            anim.SetBool("IsMoving", false);
+            if (velocity != Vector2.zero)
+            {
+                anim.SetBool("IsMoving", true);
+            }
+            else
+            {
+                anim.SetBool("IsMoving", false);
+            }
         }
         rb.MovePosition(rb.position + velocity * speed * Time.fixedDeltaTime);
+    }
+
+    protected void HealPlayer(int healAmount)
+    {
+        if(currentHealth < maxHealth)
+        {
+            currentHealth += healAmount;
+            Debug.Log("Healed for " + healAmount);
+            if(currentHealth > maxHealth)
+            {
+                currentHealth = maxHealth;
+            }
+        }
     }
 
     public virtual void OnMove(InputAction.CallbackContext ctx)
@@ -181,9 +200,11 @@ public abstract class PlayerBaseScript : MonoBehaviour
     protected virtual void OnDestroy()
     {
         //unsubscribe to events
-        EnemyBaseScript.onDealDamage -= TakeDamage;
+        //EnemyBaseScript.onEnemyDealDamage -= TakeDamage;
         LightCrystalXP.onReceiveXP -= HandleXP;
         UpgradeManager.onPickedUpgrade -= UpdateStats;
-
+        HealingUnitScript.onDeath -= HealPlayer;
     }
+
+    
 }

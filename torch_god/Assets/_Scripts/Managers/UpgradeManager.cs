@@ -1,7 +1,9 @@
+
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using static Cinemachine.DocumentationSortingAttribute;
 
 
 public class UpgradeManager : MonoBehaviour
@@ -9,11 +11,14 @@ public class UpgradeManager : MonoBehaviour
     public delegate void OnPickedUpgrade();
     public static event OnPickedUpgrade onPickedUpgrade;
 
+    public delegate void OnAttatchUpgrade(ScriptableUpgrade upgrade, GameObject upgradeObj);
+    public static event OnAttatchUpgrade onAttatchUpgrade;
+
     [SerializeField] private TMP_Text upgradeName1, upgradeDescription1, upgradeName2, upgradeDescription2, upgradeName3, upgradeDescription3;
 
     private List<ScriptableUpgrade> chosenUpgrades = new List<ScriptableUpgrade>();
 
-    [SerializeField] private ScriptableSaveData playerData;
+    [SerializeField] private ScriptableSaveData playerSaveData;
 
     private void OnEnable()
     {
@@ -21,32 +26,35 @@ public class UpgradeManager : MonoBehaviour
     }
     private void UpgradeStat(ScriptableUpgrade upgrade)
     {
-        ScriptableSaveData playerData = LevelManager.Instance.saveData;
-        playerData.playerData.attack += upgrade.statModification.attack;
-        playerData.playerData.attackSpeed += upgrade.statModification.attackSpeed;
-        playerData.playerData.health += upgrade.statModification.health;
-        playerData.playerData.critChance += upgrade.statModification.critChance;
-        playerData.playerData.movementSpeed += upgrade.statModification.movementSpeed;
-        playerData.playerData.pickUpRange += upgrade.statModification.pickUpRange;
+        ScriptableSaveData playerSaveData = LevelManager.Instance.saveData;
+        playerSaveData.playerData.attack += upgrade.statModification.attack;
+        playerSaveData.playerData.attackSpeed += upgrade.statModification.attackSpeed;
+        playerSaveData.playerData.health += upgrade.statModification.health;
+        playerSaveData.playerData.critChance += upgrade.statModification.critChance;
+        playerSaveData.playerData.movementSpeed += upgrade.statModification.movementSpeed;
+        playerSaveData.playerData.pickUpRange += upgrade.statModification.pickUpRange;
     }
 
-    private void AttatchUpgradesToPlayer(GameObject upgrade)
+    private GameObject AttatchUpgradesToPlayer(GameObject upgrade)
     {
         GameObject parent = LevelManager.Instance.player;
-
+        GameObject upgradeObj;
         if (upgrade.GetComponent<IUpgradeable>().ReturnScriptableObject().needAim)
         {
             Weapon weaponReference = parent.GetComponentInChildren<Weapon>();
-            GameObject upgradeObj = Instantiate(upgrade, weaponReference.transform.position, weaponReference.firePoint.rotation);
+            upgradeObj = Instantiate(upgrade, weaponReference.transform.position, weaponReference.firePoint.rotation);
             upgradeObj.transform.parent = weaponReference.firePoint.transform;
 
         }
         else
         {
             
-            GameObject upgradeObj = Instantiate(upgrade, parent.transform.position, Quaternion.identity);
+            upgradeObj = Instantiate(upgrade, parent.transform.position, Quaternion.identity);
             upgradeObj.transform.parent = parent.transform;
+     
         }
+        return upgradeObj;
+        
     }
 
     private void Item()
@@ -73,8 +81,12 @@ public class UpgradeManager : MonoBehaviour
 
         if (!hasUpgrade)
         {
-            playerData.playerData.currentUpgradeIDs.Add(ResourceSystem.Instance.GetUpgradeID(upgrade));
-            AttatchUpgradesToPlayer(upgrade.upgradePrefab);
+            //playerSaveData.playerData.currentUpgradeIDs.Add(ResourceSystem.Instance.GetUpgradeID(upgrade));
+            UpgradeData upgradeData = new UpgradeData();
+            upgradeData.id = ResourceSystem.Instance.GetUpgradeID(upgrade);
+            upgradeData.level = 0;
+            playerSaveData.playerData.currentUpgrades.Add(upgradeData);
+            onAttatchUpgrade?.Invoke(upgrade, AttatchUpgradesToPlayer(upgrade.upgradePrefab));
         }
     }
 

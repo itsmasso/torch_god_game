@@ -24,7 +24,7 @@ public class PhantomFireballBombs : ProjectileBase
                 IDamageable damageable = results[i].collider.GetComponent<IDamageable>();
                 if (damageable != null)
                 {
-                    damageable.Damage(damageAmount);
+                    damageable.TakeDamage(damageAmount);
                 }
                 if (anim != null && hasDestroyAnimation)
                 {

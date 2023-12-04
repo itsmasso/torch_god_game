@@ -15,6 +15,7 @@ public class ScriptableUpgrade : ScriptableObject
 {
     public UpgradeType upgradeType;
     public GameObject upgradePrefab;
+    public GameObject upgradeIcon;
     public bool needAim;
     public PlayerStats statModification;
     public string upgradeName;

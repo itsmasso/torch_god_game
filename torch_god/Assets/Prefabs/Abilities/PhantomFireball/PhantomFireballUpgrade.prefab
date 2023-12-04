@@ -47,7 +47,7 @@ MonoBehaviour:
   upgradeScriptable: {fileID: 11400000, guid: 279cf4f1d3e5327489cd12859a51f1ed, type: 2}
   canAttack: 1
   currentLevel: 0
-  additionalDamageAmount: 10
+  additionalDamageAmount: 20
   phantomFireball: {fileID: 4016931277147878012, guid: fbb07ab983c1e424ba515cf3bdfb9f85, type: 3}
   spawnInterval: 3
   spawnPadding: 4
